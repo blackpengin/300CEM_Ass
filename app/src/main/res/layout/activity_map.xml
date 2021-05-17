@@ -28,33 +28,12 @@
         android:background="@drawable/white_boarder"
         android:id="@+id/search_bar">
 
-        <ImageView
-            android:id="@+id/ic_magnify"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:layout_marginStart="10dp"
-            android:layout_marginLeft="10dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="16dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            android:src="@drawable/ic_magnify"/>
-
-        <EditText
-            android:id="@+id/input_search"
+        <fragment
+            android:id="@+id/autocomplete_fragment"
+            android:name="com.google.android.libraries.places.widget.AutocompleteSupportFragment"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginStart="30dp"
-            android:layout_marginLeft="30dp"
-            android:background="@null"
-            android:hint="Enter Address"
-            android:imeOptions="actionSearch"
-            android:textColor="#000"
-            android:textSize="15sp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/ic_magnify"
-            app:layout_constraintTop_toTopOf="parent"
-            android:inputType="text"/>
+            android:layout_height="wrap_content"
+            tools:layout_editor_absoluteY="16dp" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
