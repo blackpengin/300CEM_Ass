@@ -16,7 +16,7 @@
         android:theme="@style/Theme.300CEM_Ass">
 
         <meta-data
-            android:name="com.google.android.gms.API_KEY"
+            android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyBJc1xozpsesj_7POBVbEGteAXEahujBJE"/>
 
         <meta-data
