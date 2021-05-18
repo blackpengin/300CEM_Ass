@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "215998899555",
+    "project_id": "cemass",
+    "storage_bucket": "cemass.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:215998899555:android:a8c4a565e9d1c0ae1f5f56",
+        "android_client_info": {
+          "package_name": "com.example.a300cem_ass"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCSRhuxHD25n__CUgooEDY27c42DgJNvuw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
