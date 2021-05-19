@@ -1,47 +1,31 @@
 package com.example.a300cem_ass.models;
 
+import android.app.Application;
+
+import java.io.Serializable;
 import java.util.List;
 
-public class User {
+public class User extends Application implements Serializable {
 
-    private String email;
-    private String password;
-    private List<List> routes;
-    private List<PlaceInfo> placeInfos;
+    static String uid;
+    static List<PlaceInfo> routes;
 
     public User() {
-        // Default constructor required for calls to DataSnapshot.getValue(User.class)
     }
 
-    public String getEmail() {
-        return email;
+    public static String getUid() {
+        return uid;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
-    public List<List> getRoutes() {
+    public static List<PlaceInfo> getRoutes() {
         return routes;
     }
 
-    public List<PlaceInfo> getPlaceInfos() {
-        return placeInfos;
+    public static void setUid(String s) {
+        uid = s;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public void setRoutes(List<List> routes) {
-        this.routes = routes;
-    }
-
-    public void setPlaceInfos(List<PlaceInfo> placeInfos) {
-        this.placeInfos = placeInfos;
+    public static void setRoutes(List<PlaceInfo> r) {
+        routes = r;
     }
 }

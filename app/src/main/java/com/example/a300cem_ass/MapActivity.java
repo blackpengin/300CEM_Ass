@@ -3,8 +3,6 @@ package com.example.a300cem_ass;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.Address;
-import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
@@ -26,6 +24,7 @@ import com.android.volley.Response;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.a300cem_ass.models.PlaceInfo;
+import com.example.a300cem_ass.models.User;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -39,17 +38,19 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -85,6 +86,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
     private static final float DEFAULT_ZOOM = 15f;
     final AtomicInteger requestsCounter = new AtomicInteger(0);
+    final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     //widgets
     private String mSearchText;
@@ -92,6 +94,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     private Button mAddToRoute;
 
     //var
+    private FirebaseAuth mAuth;
     private Boolean mLocationPermissionGranted = false;
     private GoogleMap mMap;
     private FusedLocationProviderClient mFusedLocationProviderClient;
@@ -99,16 +102,20 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     private PlaceInfo mPlace;
     RequestQueue queue;
     JSONObject responseJson;
+    private List<PlaceInfo> routes;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
         //mSearchText = (EditText) findViewById(R.id.input_search);
+        mAuth = FirebaseAuth.getInstance();
         mGps = (ImageView) findViewById(R.id.ic_gps);
         mInfo = (ImageView) findViewById(R.id.place_info);
         mAddToRoute = (Button) findViewById(R.id.add_route);
         queue = Volley.newRequestQueue(getApplicationContext());
+        routes = new ArrayList<>();
+
         getLocationPermission();
 
         initAutoComplete();
@@ -143,12 +150,24 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                             responseJson =  new JSONObject(response).getJSONObject("result");
                             mPlace = new PlaceInfo();
 
-                            mPlace.setName(responseJson.getString("name"));
-                            mPlace.setLatlng(new LatLng(responseJson.getJSONObject("geometry").getJSONObject("location").getDouble("lat"), responseJson.getJSONObject("geometry").getJSONObject("location").getDouble("lng")));
-                            mPlace.setOpenNow(responseJson.getJSONObject("opening_hours").getBoolean("open_now"));
-                            mPlace.setAddress(responseJson.getString("formatted_address"));
-                            mPlace.setPhoneNumber(responseJson.getString("formatted_phone_number"));
-                            mPlace.setRating((float) responseJson.getDouble("rating"));
+                            if(responseJson.has("name")){
+                                mPlace.setName(responseJson.getString("name"));
+                            }
+                            if(responseJson.has("geometry")){
+                                mPlace.setLatlng(new LatLng(responseJson.getJSONObject("geometry").getJSONObject("location").getDouble("lat"), responseJson.getJSONObject("geometry").getJSONObject("location").getDouble("lng")));
+                            }
+                            if(responseJson.has("opening_hours")){
+                                mPlace.setOpenNow(responseJson.getJSONObject("opening_hours").getBoolean("open_now"));
+                            }
+                            if(responseJson.has("formatted_address")){
+                                mPlace.setAddress(responseJson.getString("formatted_address"));
+                            }
+                            if(responseJson.has("formatted_phone_number")){
+                                mPlace.setPhoneNumber(responseJson.getString("formatted_phone_number"));
+                            }
+                            if(responseJson.has("rating")){
+                                mPlace.setRating((float) responseJson.getDouble("rating"));
+                            }
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -166,7 +185,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
                     if (requestsCounter.get() == 0) {
                         //all request are done
-                        moveCamera(new LatLng(mPlace.getLatlng().latitude, mPlace.getLatlng().longitude), DEFAULT_ZOOM, mPlace);
+                        moveCamera(mPlace, DEFAULT_ZOOM);
                     }
                 });
 
@@ -222,28 +241,38 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     }
 
     private void AddToRoute(){
+        WriteFirestore();
+
         Intent intent = new Intent(this, RouteActivity.class);
         startActivity(intent);
     }
 
-    private void geoLocate(){
-        Log.d(TAG, "geoLocate: geolocating");
+    private void WriteFirestore() {
+        routes.add(mPlace);
 
-        Geocoder geocoder = new Geocoder(MapActivity.this);
-        List<Address> list = new ArrayList<>();
-        try{
-            list = geocoder.getFromLocationName(mPlace.getName(), 1);
-        }catch(IOException e){
-            Log.e(TAG, "geoLocate: IOException: " + e.getMessage() );
-        }
+        db
+                .collection("users")
+                .document(User.getUid())
+                .update("routes", routes)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                Log.d(TAG, "onSuccess: Routes: " + routes);
+                Toast.makeText(MapActivity.this, "Location successfully added!", Toast.LENGTH_SHORT).show();
+                EnterRouteActivity();
+            }
+        })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Toast.makeText(MapActivity.this, "Error adding location.", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
 
-        if(list.size() > 0){
-            Address address = list.get(0);
-
-            Log.d(TAG, "geoLocate: found a location: " + address.toString());
-            //Toast.makeText(this, address.toString(), Toast.LENGTH_SHORT).show();
-            moveCamera(new LatLng(address.getLatitude(), address.getLongitude()), DEFAULT_ZOOM, mPlace);
-        }
+    private void EnterRouteActivity(){
+        Intent intent = new Intent(this, RouteActivity.class);
+        startActivity(intent);
     }
 
     private void getDeviceLocation() {
@@ -284,9 +313,9 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         });
     }
 
-    private void moveCamera(LatLng latlng, float zoom, PlaceInfo place) {
-        Log.d(TAG, "moveCamera: moving the camera to lat: " + latlng.latitude + ", lng: " + latlng.longitude);
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latlng, zoom));
+    private void moveCamera(PlaceInfo place, float zoom) {
+        Log.d(TAG, "moveCamera: moving the camera to lat: " + place.getLatlng().latitude + ", lng: " + place.getLatlng().longitude);
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(place.getLatlng(), zoom));
 
         mMap.clear();
 
@@ -294,20 +323,32 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
         // init place info
         String placeInfo = "";
+        if (place.getOpenNow() != null) {
             boolean mOpenNow = place.getOpenNow();
-            if(mOpenNow){
+            if (mOpenNow) {
                 placeInfo += "Open Now: Yes" + "\n";
-            }else{
+            } else {
                 placeInfo += "Open Now: No" + "\n";
             }
+            Log.d(TAG, "moveCamera: " + place.getOpenNow());
+        }
+        if (place.getAddress() != null) {
             placeInfo += "Address: " + place.getAddress() + "\n";
+            Log.d(TAG, "moveCamera: " + place.getAddress());
+        }
+        if (place.getPhoneNumber() != null) {
             placeInfo += "Phone Number: " + place.getPhoneNumber() + "\n";
-            placeInfo += "Rating: " + place.getRating() + "\n";
+            Log.d(TAG, "moveCamera: " + place.getPhoneNumber());
+        }
 
+        if (place.getRating() != 0.0) {
+            placeInfo += "Rating: " + place.getRating() + "\n";
+            Log.d(TAG, "moveCamera: " + place.getRating());
+        }
         Log.d(TAG, "moveCamera: " + placeInfo);
-            // add marker
+        // add marker
         MarkerOptions options = new MarkerOptions()
-                .position(latlng)
+                .position(place.getLatlng())
                 .title(place.getName())
                 .snippet(placeInfo);
 

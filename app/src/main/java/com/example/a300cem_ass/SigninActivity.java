@@ -12,15 +12,20 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.a300cem_ass.models.User;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class SigninActivity extends AppCompatActivity {
 
     private static final String TAG = "SigninActivity";
+    final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     private FirebaseAuth mAuth;
     private Button mSigninBtn, mEnterRegister;
@@ -104,7 +109,35 @@ public class SigninActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    private void EnterMainMenu(FirebaseUser user){
+    private void EnterMainMenu(FirebaseUser firebaseUser){
+        //
+        WriteFirestore(firebaseUser);
+    }
 
+    private void WriteFirestore(FirebaseUser firebaseUser) {
+        User user = new User();
+        User.setUid(firebaseUser.getUid());
+        User.setRoutes(null);
+
+        db.collection("users").document(User.getUid())
+                .set(User)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        //Toast.makeText(SigninActivity.this, "Location successfully added!", Toast.LENGTH_SHORT).show();
+                        EnterMainActivity();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        //Toast.makeText(SigninActivity.this, "Error adding location.", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    private void EnterMainActivity(){
+        Intent intent = new Intent(this, MainActivity.class);
+        startActivity(intent);
     }
 }
