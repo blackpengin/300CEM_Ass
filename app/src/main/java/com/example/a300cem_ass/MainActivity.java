@@ -13,15 +13,15 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.a300cem_ass.models.PlaceInfo;
-import com.example.a300cem_ass.models.User;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView.LayoutManager mLayoutManager;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private List<PlaceInfo> routes;
+    ArrayList<Custom_Item> itemList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,63 +50,60 @@ public class MainActivity extends AppCompatActivity {
         addRouteBtn = (Button) findViewById(R.id.addRouteBtn);
 
 
-        init();
+        ReadFirestore();
+
 
         if(isServicesOK()){
-            initMap();
+            init();
         }
     }
 
     private void init(){
-
-        ArrayList<Custom_Item> itemList = new ArrayList<>();
-        ReadFirestore();
-        itemList.add(new Custom_Item(R.drawable.ic_location, "Line 1", "Line 2"));
-        itemList.add(new Custom_Item(R.drawable.ic_location, "Line 3", "Line 4"));
-        itemList.add(new Custom_Item(R.drawable.ic_location, "Line 5", "Line 6"));
-
-        mRecycleView = findViewById(R.id.recyclerView_routes);
-        mRecycleView.setHasFixedSize(true);
-        mLayoutManager = new LinearLayoutManager(this);
-        mAdapter = new CustomAdapter(itemList);
-
-        mRecycleView.setLayoutManager(mLayoutManager);
-        mRecycleView.setAdapter(mAdapter);
-    }
-
-    private void ReadFirestore(){
-
-        DocumentReference documentReference = db
-                .collection("users")
-                .document(User.getUid());
-
-            documentReference.get().addOnCompleteListener(new OnCompleteListener() {
-            @Override
-            public void onComplete(Task task) {
-                if (task.isSuccessful()) {
-                    DocumentSnapshot documentSnapshot = (DocumentSnapshot) task.getResult();
-                    if(documentSnapshot != null){
-                        String routes_firestore = documentSnapshot.getString("routes");
-                        Log.d(TAG, "onComplete: Routes: " + routes_firestore);
-                        if(routes_firestore != null){
-                            //TODO: Put data into routes List
-                        }
-                    }else{ Log.d(TAG, "onComplete: Document null."); }
-                }else{ Log.d(TAG, "onComplete: Task failed."); }
-            }
-        });
-    }
-
-
-
-    private void initMap(){
-
         addRouteBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 EnterRouteActivity();
             }
         });
+
+    }
+
+    private void ReadFirestore(){
+        FirebaseUser user = mAuth.getCurrentUser();
+        CollectionReference reference = db
+                .collection("users")
+                .document(user.getUid())
+                .collection("routes");
+
+        reference.get().addOnCompleteListener(new OnCompleteListener() {
+            @Override
+            public void onComplete(Task task) {
+                if (task.isSuccessful()) {
+                    QuerySnapshot snapShot = (QuerySnapshot) task.getResult();
+                    Log.d(TAG, "onComplete: " + snapShot);
+                    snapShot.forEach(queryDocumentSnapshot -> {
+                        Log.d(TAG, "onComplete: " + queryDocumentSnapshot.getId());
+                        String name = queryDocumentSnapshot.getId();
+
+                        itemList.add(new Custom_Item(R.drawable.ic_location, name, ""));
+                    });
+
+                    UpdateRecycleView();
+                }else{ Log.d(TAG, "onComplete: Task failed."); }
+            }
+        });
+
+
+    }
+
+    private void UpdateRecycleView(){
+        Log.d(TAG, "UpdateRecycleView: " + itemList.size());
+        mRecycleView = findViewById(R.id.recyclerView_routes);
+        mRecycleView.setHasFixedSize(true);
+        mLayoutManager = new LinearLayoutManager(this);
+        mAdapter = new CustomAdapter(itemList);
+        mRecycleView.setLayoutManager(mLayoutManager);
+        mRecycleView.setAdapter(mAdapter);
     }
 
     private void EnterRouteActivity(){

@@ -24,7 +24,6 @@ import com.android.volley.Response;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.a300cem_ass.models.PlaceInfo;
-import com.example.a300cem_ass.models.User;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -46,14 +45,14 @@ import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
@@ -86,7 +85,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
     private static final float DEFAULT_ZOOM = 15f;
     final AtomicInteger requestsCounter = new AtomicInteger(0);
-    final FirebaseFirestore db = FirebaseFirestore.getInstance();
+    //final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     //widgets
     private String mSearchText;
@@ -100,10 +99,11 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     private FusedLocationProviderClient mFusedLocationProviderClient;
     private Marker mMarker;
     private PlaceInfo mPlace;
-    RequestQueue queue;
-    JSONObject responseJson;
-    private List<PlaceInfo> routes;
-
+    private RequestQueue queue;
+    private JSONObject responseJson;
+    private FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private String route_name;
+    private FirebaseUser user;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -114,8 +114,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         mInfo = (ImageView) findViewById(R.id.place_info);
         mAddToRoute = (Button) findViewById(R.id.add_route);
         queue = Volley.newRequestQueue(getApplicationContext());
-        routes = new ArrayList<>();
-
+        route_name = getIntent().getStringExtra("route_name");
+        user = mAuth.getCurrentUser();
         getLocationPermission();
 
         initAutoComplete();
@@ -222,7 +222,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                         Log.d(TAG, "onClick: place info: " + mPlace);
                         mMarker.showInfoWindow();
                     }
-                    
+
                 }catch(NullPointerException e){
                     Log.e(TAG, "onClick: NullPointerException" + e.getMessage() );
                 }
@@ -241,27 +241,49 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     }
 
     private void AddToRoute(){
-        WriteFirestore();
+        AddDocument();
 
         Intent intent = new Intent(this, RouteActivity.class);
         startActivity(intent);
     }
 
-    private void WriteFirestore() {
-        routes.add(mPlace);
-
+    private void AddDocument() {
         db
                 .collection("users")
-                .document(User.getUid())
-                .update("routes", routes)
+                .document(user.getUid())
+                .collection("routes")
+                .document(route_name)
+                .collection("locations")
+                .add(mPlace.getName())
+                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                    @Override
+                    public void onSuccess(DocumentReference documentReference) {
+                        WriteFirestore();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                    }
+                });
+    }
+
+    private void WriteFirestore() {
+        db
+                .collection("users")
+                .document(user.getUid())
+                .collection("routes")
+                .document(route_name)
+                .collection("locations")
+                .document(mPlace.getName())
+                .set(mPlace)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
-            @Override
-            public void onSuccess(Void aVoid) {
-                Log.d(TAG, "onSuccess: Routes: " + routes);
-                Toast.makeText(MapActivity.this, "Location successfully added!", Toast.LENGTH_SHORT).show();
-                EnterRouteActivity();
-            }
-        })
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Toast.makeText(MapActivity.this, "Location successfully added!", Toast.LENGTH_SHORT).show();
+                        BackToRouteActivity();
+                    }
+                })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
@@ -270,7 +292,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 });
     }
 
-    private void EnterRouteActivity(){
+    private void BackToRouteActivity(){
         Intent intent = new Intent(this, RouteActivity.class);
         startActivity(intent);
     }
