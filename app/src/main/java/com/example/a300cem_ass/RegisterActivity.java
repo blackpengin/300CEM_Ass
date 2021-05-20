@@ -13,13 +13,10 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.apache.commons.lang3.StringUtils;
@@ -90,7 +87,7 @@ public class RegisterActivity extends AppCompatActivity {
                             Log.d(TAG, "createUserWithEmail:success");
                             Toast.makeText(RegisterActivity.this, "Authentication success! ",
                                     Toast.LENGTH_SHORT).show();
-                            WriteFirestore();
+                            EnterSignin();
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "createUserWithEmail:failure", task.getException());
@@ -102,7 +99,7 @@ public class RegisterActivity extends AppCompatActivity {
                 });
     }
 
-    private void WriteFirestore() {
+    /*private void WriteFirestore() {
         db
                 .collection("users")
                 .add(mAuth.getCurrentUser().getUid())
@@ -119,7 +116,7 @@ public class RegisterActivity extends AppCompatActivity {
                         Toast.makeText(RegisterActivity.this, "Register Failed.", Toast.LENGTH_SHORT).show();
                     }
                 });
-    }
+    }*/
 
     private void EnterSignin(){
         Intent intent = new Intent(this, SigninActivity.class);

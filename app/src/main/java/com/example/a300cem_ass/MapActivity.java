@@ -1,7 +1,6 @@
 package com.example.a300cem_ass;
 
 import android.Manifest;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -15,6 +14,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
@@ -37,8 +37,10 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.net.PlacesClient;
@@ -46,8 +48,9 @@ import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -65,7 +68,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         mMap = googleMap;
 
         if (mLocationPermissionGranted) {
-            getDeviceLocation();
+            //getDeviceLocation();
 
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 return;
@@ -104,6 +107,10 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private String route_name;
     private FirebaseUser user;
+    private String location_name;
+    private ConstraintLayout searchBar;
+    private int order;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -113,13 +120,20 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         mGps = (ImageView) findViewById(R.id.ic_gps);
         mInfo = (ImageView) findViewById(R.id.place_info);
         mAddToRoute = (Button) findViewById(R.id.add_route);
+        searchBar = (ConstraintLayout) findViewById(R.id.places_autocomplete_search_bar);
         queue = Volley.newRequestQueue(getApplicationContext());
         route_name = getIntent().getStringExtra("route_name");
+        Log.d(TAG, "onCreate: route_name" + route_name);
         user = mAuth.getCurrentUser();
         getLocationPermission();
 
         initAutoComplete();
 
+        location_name = getIntent().getStringExtra("location_name");
+        if(!location_name.equals("")){
+            mAddToRoute.setVisibility(View.INVISIBLE);
+            ReadFirestore();
+        }
     }
 
     private void initAutoComplete(){
@@ -141,7 +155,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
             @Override
             public void onPlaceSelected(Place place) {
-                // TODO: Get info about the selected place.
                 StringRequest placeInfoRequest = new StringRequest(Request.Method.POST, "https://maps.googleapis.com/maps/api/place/details/json?placeid=" + place.getId() + "&key=" + apiKey+ "&fields=name,geometry,opening_hours,formatted_address,formatted_phone_number,rating", new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
@@ -150,11 +163,14 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                             responseJson =  new JSONObject(response).getJSONObject("result");
                             mPlace = new PlaceInfo();
 
+                            mPlace.setInRoute(getIntent().getStringExtra("route_name"));
+
                             if(responseJson.has("name")){
                                 mPlace.setName(responseJson.getString("name"));
                             }
                             if(responseJson.has("geometry")){
-                                mPlace.setLatlng(new LatLng(responseJson.getJSONObject("geometry").getJSONObject("location").getDouble("lat"), responseJson.getJSONObject("geometry").getJSONObject("location").getDouble("lng")));
+                                mPlace.setLatitude(responseJson.getJSONObject("geometry").getJSONObject("location").getDouble("lat"));
+                                mPlace.setLongitude(responseJson.getJSONObject("geometry").getJSONObject("location").getDouble("lng"));
                             }
                             if(responseJson.has("opening_hours")){
                                 mPlace.setOpenNow(responseJson.getJSONObject("opening_hours").getBoolean("open_now"));
@@ -233,47 +249,84 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             @Override
             public void onClick(View view) {
                 Log.d(TAG, "onClick: clicked add to route");
-                AddToRoute();
+                CountRoutes();
             }
         });
 
         hideSoftKeyboard();
     }
 
-    private void AddToRoute(){
-        AddDocument();
+    private void CountRoutes() {
+        order = -1;
+        db
+                .collection("locations")
+                .whereEqualTo("inRoute", route_name)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (DocumentSnapshot document : task.getResult()) {
+                                order++;
 
-        Intent intent = new Intent(this, RouteActivity.class);
-        startActivity(intent);
+                            }
+                            ;
+                            mPlace.setOrder(++order);
+                            WriteFirestore();
+                        } else {
+                            Log.d(TAG, "onComplete: Task failed.");
+                        }
+                    }
+                });
     }
 
-    private void AddDocument() {
+    private void ReadFirestore(){
         db
-                .collection("users")
-                .document(user.getUid())
-                .collection("routes")
-                .document(route_name)
                 .collection("locations")
-                .add(mPlace.getName())
-                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                .whereEqualTo("name", location_name)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
-                    public void onSuccess(DocumentReference documentReference) {
-                        WriteFirestore();
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (DocumentSnapshot document : task.getResult()) {
+                                Log.d(TAG, "onComplete: " + document);
+                                if(document.get("inRoute").toString().equals(route_name)){
+                                    mPlace = new PlaceInfo();
+                                    if(document.get("name") != null){
+                                        mPlace.setName(document.get("name").toString());
+                                    }
+                                    if(document.get("latitude") != null){
+                                        mPlace.setLatitude((Double) document.get("latitude"));
+                                    }
+                                    if(document.get("longitude") != null){
+                                        mPlace.setLongitude((Double) document.get("longitude"));
+                                    }
+                                    if(document.get("open") != null){
+                                        mPlace.setOpenNow((Boolean) document.get("open"));
+                                    }
+                                    if(document.get("address") != null){
+                                        mPlace.setAddress(document.get("address").toString());
+                                    }
+                                    if(document.get("phoneNumber") != null){
+                                        mPlace.setPhoneNumber(document.get("phoneNumber").toString());
+                                    }
+                                    if(document.get("rating") != null){
+                                        mPlace.setRating((Double) document.get("rating"));
+                                    }
+                                    moveCamera(mPlace, DEFAULT_ZOOM);
+                                }
+
+                            };
+                        }
+                        else{ Log.d(TAG, "onComplete: Task failed."); }
                     }
                 });
     }
 
     private void WriteFirestore() {
+
         db
-                .collection("users")
-                .document(user.getUid())
-                .collection("routes")
-                .document(route_name)
                 .collection("locations")
                 .document(mPlace.getName())
                 .set(mPlace)
@@ -293,8 +346,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     }
 
     private void BackToRouteActivity(){
-        Intent intent = new Intent(this, RouteActivity.class);
-        startActivity(intent);
+        finish();
     }
 
     private void getDeviceLocation() {
@@ -336,8 +388,10 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     }
 
     private void moveCamera(PlaceInfo place, float zoom) {
-        Log.d(TAG, "moveCamera: moving the camera to lat: " + place.getLatlng().latitude + ", lng: " + place.getLatlng().longitude);
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(place.getLatlng(), zoom));
+        hideSoftKeyboard();
+        LatLng latlng = new LatLng(place.getLatitude(), place.getLongitude());
+        Log.d(TAG, "moveCamera: moving the camera to lat: " + latlng.latitude + ", lng: " + latlng.longitude);
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latlng, zoom));
 
         mMap.clear();
 
@@ -370,14 +424,14 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         Log.d(TAG, "moveCamera: " + placeInfo);
         // add marker
         MarkerOptions options = new MarkerOptions()
-                .position(place.getLatlng())
+                .position(latlng)
                 .title(place.getName())
                 .snippet(placeInfo);
 
         mMarker = mMap.addMarker(options);
 
 
-        hideSoftKeyboard();
+
     }
 
     private void moveCamera(LatLng latlng, float zoom, String title){

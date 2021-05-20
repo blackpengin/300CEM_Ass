@@ -21,4 +21,6 @@ public class Custom_Item {
     public String getText2() {
         return mText2;
     }
+
+
 }

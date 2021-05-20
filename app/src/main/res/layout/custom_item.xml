@@ -6,6 +6,7 @@
     app:cardCornerRadius="4dp">
 
     <RelativeLayout
+        android:id="@+id/itembar"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="5dp"
@@ -22,7 +23,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:layout_toEndOf="@+id/imageView"
-            android:layout_toRightOf="@+id/imageView"
+            android:layout_weight="1"
             android:text="Line 1"
             android:textColor="@android:color/black"
             android:textSize="20sp"
@@ -36,9 +37,15 @@
             android:textSize="15sp"
             android:layout_below="@+id/textView1"
             android:layout_toEndOf="@+id/imageView"
-            android:layout_toRightOf="@+id/imageView"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp" />
+            android:layout_marginStart="8dp" />
+
+        <ImageView
+            android:id="@+id/handle"
+            android:layout_width="?listPreferredItemHeight"
+            android:layout_height="50dp"
+            android:layout_alignParentEnd="true"
+            android:scaleType="center"
+            android:src="@drawable/ic_reorder" />
 
     </RelativeLayout>
 

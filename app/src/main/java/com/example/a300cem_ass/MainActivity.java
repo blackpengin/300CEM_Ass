@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -18,8 +19,6 @@ import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 
@@ -35,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private Button addRouteBtn;
     private RecyclerView mRecycleView;
-    private RecyclerView.Adapter mAdapter;
+    private CustomAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private List<PlaceInfo> routes;
@@ -58,6 +57,12 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        UpdateRecycleView();
+    }
+
     private void init(){
         addRouteBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -69,15 +74,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void ReadFirestore(){
-        FirebaseUser user = mAuth.getCurrentUser();
-        CollectionReference reference = db
-                .collection("users")
-                .document(user.getUid())
-                .collection("routes");
-
-        reference.get().addOnCompleteListener(new OnCompleteListener() {
-            @Override
-            public void onComplete(Task task) {
+        db
+                .collection("routes")
+                .whereEqualTo("uid", mAuth.getCurrentUser().getUid())
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 if (task.isSuccessful()) {
                     QuerySnapshot snapShot = (QuerySnapshot) task.getResult();
                     Log.d(TAG, "onComplete: " + snapShot);
@@ -85,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
                         Log.d(TAG, "onComplete: " + queryDocumentSnapshot.getId());
                         String name = queryDocumentSnapshot.getId();
 
-                        itemList.add(new Custom_Item(R.drawable.ic_location, name, ""));
+                        itemList.add(new Custom_Item(R.drawable.ic_route, name, ""));
                     });
 
                     UpdateRecycleView();
@@ -96,7 +99,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void UpdateRecycleView(){
+    private void UpdateRecycleView() {
         Log.d(TAG, "UpdateRecycleView: " + itemList.size());
         mRecycleView = findViewById(R.id.recyclerView_routes);
         mRecycleView.setHasFixedSize(true);
@@ -104,6 +107,20 @@ public class MainActivity extends AppCompatActivity {
         mAdapter = new CustomAdapter(itemList);
         mRecycleView.setLayoutManager(mLayoutManager);
         mRecycleView.setAdapter(mAdapter);
+
+        mAdapter.setOnItemClickListener(new CustomAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(int position) {
+                // Recycle view object clicked
+                EnterRoute(itemList.get(position).getText1());
+            }
+        });
+    }
+
+    private void EnterRoute(String routeName){
+        Intent intent = new Intent(this, RouteActivity.class);
+        intent.putExtra("route_name", routeName);
+        startActivity(intent);
     }
 
     private void EnterRouteActivity(){

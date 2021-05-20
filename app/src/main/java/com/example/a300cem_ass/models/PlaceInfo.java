@@ -1,25 +1,37 @@
 package com.example.a300cem_ass.models;
 
-import com.google.android.gms.maps.model.LatLng;
-
 public class PlaceInfo {
 
+    private String inRoute;
     private String name;
-    private LatLng latlng;
+    private Double latitude, longitude;
     private Boolean openNow;
     private String address;
     private String phoneNumber;
-    private float rating;
+    private double rating;
+    private int order;
 
     public PlaceInfo(){
     }
 
-    public String getName() {
-        return name;
+    public String getInRoute() {
+        return inRoute;
     }
 
-    public LatLng getLatlng() {
-        return latlng;
+    public Double getLatitude() {
+        return latitude;
+    }
+
+    public Double getLongitude() {
+        return longitude;
+    }
+
+    public int getOrder() {
+        return order;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public Boolean getOpenNow() {
@@ -34,16 +46,16 @@ public class PlaceInfo {
         return phoneNumber;
     }
 
-    public float getRating() {
+    public double getRating() {
         return rating;
+    }
+
+    public void setInRoute(String inRoute) {
+        this.inRoute = inRoute;
     }
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public void setLatlng(LatLng latlng) {
-        this.latlng = latlng;
     }
 
     public void setOpenNow(Boolean openNow) {
@@ -58,19 +70,34 @@ public class PlaceInfo {
         this.phoneNumber = phoneNumber;
     }
 
-    public void setRating(float rating) {
+    public void setOrder(int order) {
+        this.order = order;
+    }
+
+    public void setLatitude(Double latitude) {
+        this.latitude = latitude;
+    }
+
+    public void setLongitude(Double longitude) {
+        this.longitude = longitude;
+    }
+
+    public void setRating(double rating) {
         this.rating = rating;
     }
 
     @Override
     public String toString() {
         return "PlaceInfo{" +
-                "name='" + name + '\'' +
-                ", latlng=" + latlng +
+                "inRoute='" + inRoute + '\'' +
+                ", name='" + name + '\'' +
+                ", latitude=" + latitude +
+                ", longitude=" + longitude +
                 ", openNow=" + openNow +
                 ", address='" + address + '\'' +
                 ", phoneNumber='" + phoneNumber + '\'' +
                 ", rating=" + rating +
                 '}';
     }
+
 }
