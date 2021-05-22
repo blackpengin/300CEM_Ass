@@ -64,7 +64,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        Toast.makeText(this, "Map is Ready", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, R.string.map_is_ready, Toast.LENGTH_SHORT).show();
         Log.d(TAG, "onMapReady: map is ready");
         mMap = googleMap;
 
@@ -254,7 +254,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 if(mPlace != null){
                     CountRoutes();
                 }else{
-                    Toast.makeText(MapActivity.this, "Please search a location", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MapActivity.this, R.string.please_search_location, Toast.LENGTH_SHORT).show();
                 }
 
             }
@@ -358,13 +358,15 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                                             @Override
                                             public void onComplete(Task<Void> task) {
                                                 if (task.isSuccessful()) {
-                                                    Toast.makeText(MapActivity.this, "Location successfully added!", Toast.LENGTH_SHORT).show();
+                                                    Toast.makeText(MapActivity.this, R.string.add_location_success, Toast.LENGTH_SHORT).show();
                                                     BackToRouteActivity();
+                                                }else{
+                                                    Toast.makeText(MapActivity.this, R.string.add_location_fail, Toast.LENGTH_SHORT).show();
                                                 }
                                             }
                                         });
                             }else{
-                                Toast.makeText(MapActivity.this, "Location already exist in current route.", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(MapActivity.this, R.string.location_exist, Toast.LENGTH_SHORT).show();
                             }
                         }
                     }

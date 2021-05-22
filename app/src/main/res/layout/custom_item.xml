@@ -24,7 +24,6 @@
             android:layout_alignParentTop="true"
             android:layout_toEndOf="@+id/imageView"
             android:layout_toStartOf="@+id/handle"
-            android:layout_weight="1"
             android:text="Line 1"
             android:textColor="@android:color/black"
             android:textSize="20sp"

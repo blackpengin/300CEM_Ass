@@ -64,15 +64,19 @@ public class RegisterActivity extends AppCompatActivity {
         String password = ((EditText) findViewById(R.id.password_register)).getText().toString();
         String confirm_password = ((EditText) findViewById(R.id.confirm_password)).getText().toString();
         Log.d(TAG, "Register: " + password + ", " + confirm_password + ", " + password.equals(confirm_password));
-        if(!password.equals("")){
-            if(password.equals(confirm_password)) {
-                AuthRegister(email, password);
-            }
-            else {
-                Toast.makeText(RegisterActivity.this, "Password & Confirm Password is not the same.", Toast.LENGTH_SHORT).show();
+        if(!email.equals("")){
+            if(!password.equals("")){
+                if(password.equals(confirm_password)) {
+                    AuthRegister(email, password);
+                }
+                else {
+                    Toast.makeText(RegisterActivity.this, R.string.pw_confirm_pw_not_equal, Toast.LENGTH_SHORT).show();
+                }
+            }else{
+                Toast.makeText(RegisterActivity.this, R.string.pw_empty, Toast.LENGTH_SHORT).show();
             }
         }else{
-            Toast.makeText(RegisterActivity.this, "Password cannot be empty.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(RegisterActivity.this, R.string.email_empty, Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -85,38 +89,19 @@ public class RegisterActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "createUserWithEmail:success");
-                            Toast.makeText(RegisterActivity.this, "Authentication success! ",
+                            Toast.makeText(RegisterActivity.this, R.string.auth_success,
                                     Toast.LENGTH_SHORT).show();
                             EnterSignin();
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "createUserWithEmail:failure", task.getException());
-                            Toast.makeText(RegisterActivity.this, "Authentication failed. " + StringUtils.substringBetween(task.getException().toString(), "[", "]"),
+                            Toast.makeText(RegisterActivity.this, R.string.auth_fail + StringUtils.substringBetween(task.getException().toString(), "[", "]"),
                                     Toast.LENGTH_SHORT).show();
                             //updateUI(null);
                         }
                     }
                 });
     }
-
-    /*private void WriteFirestore() {
-        db
-                .collection("users")
-                .add(mAuth.getCurrentUser().getUid())
-                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                    @Override
-                    public void onSuccess(DocumentReference documentReference) {
-                        Toast.makeText(RegisterActivity.this, "Register Successful!", Toast.LENGTH_SHORT).show();
-                        EnterSignin();
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Toast.makeText(RegisterActivity.this, "Register Failed.", Toast.LENGTH_SHORT).show();
-                    }
-                });
-    }*/
 
     private void EnterSignin(){
         Intent intent = new Intent(this, SigninActivity.class);

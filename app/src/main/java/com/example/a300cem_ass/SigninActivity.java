@@ -72,7 +72,7 @@ public class SigninActivity extends AppCompatActivity {
         if(!password.equals("")){
                 AuthRegister(email, password);
         }else{
-            Toast.makeText(SigninActivity.this, "Password cannot be empty.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(SigninActivity.this, R.string.pw_empty, Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -85,7 +85,7 @@ public class SigninActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "signInWithEmail:success");
-                            Toast.makeText(SigninActivity.this, "Sign in success!",
+                            Toast.makeText(SigninActivity.this, R.string.sign_in_success,
                                     Toast.LENGTH_SHORT).show();
                             FirebaseUser user = mAuth.getCurrentUser();
                             // Enter Main Menu
@@ -93,7 +93,7 @@ public class SigninActivity extends AppCompatActivity {
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "signInWithEmail:failure", task.getException());
-                            Toast.makeText(SigninActivity.this, "Sign in failed.",
+                            Toast.makeText(SigninActivity.this, ""+R.string.sign_in_fail + task.getException(),
                                     Toast.LENGTH_SHORT).show();
                         }
                     }

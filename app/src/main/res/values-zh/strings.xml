@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">300CEM_Ass</string>
+    <string name="google_maps_API_key">AIzaSyAt5J1Vp6IQpnWxONizx5kLfxT3yNIp1lU</string>
+
+    <string name="add_route">添加路線</string>
+    <string name="add_location">添加位置</string>
+    <string name="email">電郵</string>
+    <string name="password">密碼</string>
+    <string name="confirm_password">確認密碼</string>
+    <string name="register">註冊</string>
+    <string name="route_name">路線名稱</string>
+    <string name="start_routing">開始追蹤路線</string>
+    <string name="signin">登入</string>
+
+    <string name="map_service_not_available">谷歌地圖未能提供服務.</string>
+    <string name="map_is_ready">地圖已準備好.</string>
+    <string name="please_search_location">請搜尋位置.</string>
+    <string name="add_location_success">成功添加位置!</string>
+    <string name="add_location_fail">添加位置失敗.</string>
+    <string name="location_exist">位置已存在於路線,不能重複.</string>
+    <string name="pw_confirm_pw_not_equal">密碼/確認密碼不一致.</string>
+    <string name="email_empty">請輸入電郵.</string>
+    <string name="pw_empty">請輸入密碼.</string>
+    <string name="auth_success">註冊成功!</string>
+    <string name="auth_fail">註冊失敗. </string>
+    <string name="please_add_two_locations">請至少添加兩個位置.</string>
+    <string name="please_enter_route_name">請輸入路線名稱.</string>
+    <string name="route_exist">路線名稱已存在.</string>
+    <string name="get_location_fail">未能取得位置, 請重試.</string>
+    <string name="routing_fail">規劃路線失敗.</string>
+    <string name="routing_success">成功規劃路線!</string>
+    <string name="sign_in_success">成功登入!</string>
+    <string name="sign_in_fail">登入失敗.</string>
+</resources>

@@ -10,6 +10,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -17,6 +18,8 @@ import com.example.a300cem_ass.models.PlaceInfo;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -48,10 +51,13 @@ public class MainActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
         addRouteBtn = (Button) findViewById(R.id.addRouteBtn);
-
+        mRecycleView = findViewById(R.id.recyclerView_routes);
+        mRecycleView.setHasFixedSize(true);
         if(isServicesOK()){
             init();
         }
+
+
     }
 
     @Override
@@ -95,13 +101,11 @@ public class MainActivity extends AppCompatActivity {
 
     private void UpdateRecycleView() {
         Log.d(TAG, "UpdateRecycleView: " + itemList.size());
-        mRecycleView = findViewById(R.id.recyclerView_routes);
-        mRecycleView.setHasFixedSize(true);
+
         mLayoutManager = new LinearLayoutManager(this);
         mAdapter = new CustomAdapter(itemList);
         mRecycleView.setLayoutManager(mLayoutManager);
         mRecycleView.setAdapter(mAdapter);
-
         mAdapter.setOnItemClickListener(new CustomAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(int position) {
@@ -109,6 +113,8 @@ public class MainActivity extends AppCompatActivity {
                 EnterRoute(itemList.get(position).getText1());
             }
         });
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(callback);
+        itemTouchHelper.attachToRecyclerView(mRecycleView);
     }
 
     private void EnterRoute(String routeName){
@@ -138,8 +144,73 @@ public class MainActivity extends AppCompatActivity {
             Dialog dialog = GoogleApiAvailability.getInstance().getErrorDialog(MainActivity.this, available, ERROR_DIALOG_REQUEST);
             dialog.show();
         }else{
-            Toast.makeText(this, "You can't make map requests", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.map_service_not_available, Toast.LENGTH_SHORT).show();
         }
         return false;
+    }
+
+    ItemTouchHelper.Callback callback = new ItemTouchHelper.Callback() {
+        @Override
+        public int getMovementFlags(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
+            int dragFlags = ItemTouchHelper.UP | ItemTouchHelper.DOWN;
+            int swipeFlags = ItemTouchHelper.START | ItemTouchHelper.END;
+            return makeMovementFlags(dragFlags, swipeFlags);
+        }
+
+        @Override
+        public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+            return false;// true if moved, false otherwise
+        }
+
+        @Override
+        public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
+            int position = viewHolder.getAdapterPosition();
+            RemoveFSData(position);
+            itemList.remove(position);
+            mAdapter.notifyItemRemoved(position);
+        }
+    };
+
+    private void RemoveFSData(int position) {
+        db
+                .collection("locations")
+                .whereEqualTo("inRoute", itemList.get(position).getText1())
+                .whereEqualTo("uid", mAuth.getCurrentUser().getUid())
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            Log.d(TAG, "onComplete: Removed");
+                            for(QueryDocumentSnapshot document:task.getResult()){
+                                document.getReference().delete();
+                            }
+                        }
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(Exception e) {
+                        Log.d(TAG, "onFailure: from failed");
+                    }
+                });
+
+        db
+                .collection("routes")
+                .document(itemList.get(position).getText1()+","+mAuth.getCurrentUser().getUid())
+                .delete()
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                            ReadFirestore();
+                        }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(Exception e) {
+                        Log.d(TAG, "onFailure:  failed");
+                    }
+                });
+
     }
 }

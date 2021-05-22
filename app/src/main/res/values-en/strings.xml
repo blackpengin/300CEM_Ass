@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">300CEM_Ass</string>
+    <string name="google_maps_API_key">AIzaSyAt5J1Vp6IQpnWxONizx5kLfxT3yNIp1lU</string>
+
+    <string name="add_route">ADD ROUTE</string>
+    <string name="add_location">ADD LOCATION</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="register">REGISTER</string>
+    <string name="route_name">Route Name</string>
+    <string name="start_routing">START ROUTING</string>
+    <string name="signin">SIGN IN</string>
+
+    <string name="map_service_not_available">Google Map service is not available.</string>
+    <string name="map_is_ready">Map is Ready.</string>
+    <string name="please_search_location">Please search a location.</string>
+    <string name="add_location_success">Location successfully added!</string>
+    <string name="add_location_fail">Cannot add location.</string>
+    <string name="location_exist">Location already exist in current route.</string>
+    <string name="pw_confirm_pw_not_equal">Password/Confirm Password is not the same.</string>
+    <string name="email_empty">Please enter a email.</string>
+    <string name="pw_empty">Please enter a password.</string>
+    <string name="auth_success">Authentication success!</string>
+    <string name="auth_fail">Authentication failed. </string>
+    <string name="please_add_two_locations">Please add at least 2 locations.</string>
+    <string name="please_enter_route_name">Please enter a route name.</string>
+    <string name="route_exist">Route name already exist.</string>
+    <string name="get_location_fail">Unable to get location.</string>
+    <string name="routing_fail">Routing Fail.</string>
+    <string name="routing_success">Routing Success!</string>
+    <string name="sign_in_success">Sign in success!</string>
+    <string name="sign_in_fail">Sign in failed.</string>
+
+</resources>

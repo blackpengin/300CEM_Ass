@@ -49,7 +49,7 @@ public class RouteActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_route);
-
+        mRecycleView = findViewById(R.id.recyclerView_locations);
         mAuth = FirebaseAuth.getInstance();
         mAddLocation = (Button) findViewById(R.id.add_location);
         route_name = (EditText) findViewById(R.id.route_name);
@@ -88,7 +88,7 @@ public class RouteActivity extends AppCompatActivity {
                         EnterRoutingActivity();
                     }
                     else{
-                        Toast.makeText(RouteActivity.this, "Please add at least 2 locations.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(RouteActivity.this, R.string.please_add_two_locations, Toast.LENGTH_SHORT).show();
                     }
 
             }
@@ -129,7 +129,7 @@ public class RouteActivity extends AppCompatActivity {
 
     private void UpdateRecycleView() {
 
-        mRecycleView = findViewById(R.id.recyclerView_locations);
+
         mLayoutManager = new LinearLayoutManager(this);
         mAdapter = new CustomAdapter(itemList);
         mRecycleView.setLayoutManager(mLayoutManager);
@@ -151,13 +151,13 @@ public class RouteActivity extends AppCompatActivity {
             // Check route name empty | duplicate
             if (route_name.getText().toString().equals("")) {
                 // Route name empty
-                Toast.makeText(this, "Please enter a route name.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.please_enter_route_name, Toast.LENGTH_SHORT).show();
                 return true;
             } else {
                 CheckDuplicate();
                 Log.d(TAG, "isEmptyOrDulplicate: "+hasSameRoute);
                 if (hasSameRoute) {
-                    Toast.makeText(RouteActivity.this, "Route name already exist.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(RouteActivity.this, R.string.route_exist, Toast.LENGTH_SHORT).show();
                     return true;
                 }
 
@@ -210,14 +210,7 @@ public class RouteActivity extends AppCompatActivity {
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        //Toast.makeText(RouteActivity.this, "Register Successful!", Toast.LENGTH_SHORT).show();
                         EnterMapActivity("");
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        //Toast.makeText(RouteActivity.this, "Register Failed.", Toast.LENGTH_SHORT).show();
                     }
                 });
     }
