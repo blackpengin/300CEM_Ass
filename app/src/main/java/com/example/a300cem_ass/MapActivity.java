@@ -1,6 +1,7 @@
 package com.example.a300cem_ass;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -38,7 +39,6 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.Places;
@@ -50,6 +50,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import org.json.JSONException;
@@ -165,6 +166,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
                             mPlace.setInRoute(getIntent().getStringExtra("route_name"));
 
+                            mPlace.setUid(mAuth.getCurrentUser().getUid());
                             if(responseJson.has("name")){
                                 mPlace.setName(responseJson.getString("name"));
                             }
@@ -249,7 +251,12 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             @Override
             public void onClick(View view) {
                 Log.d(TAG, "onClick: clicked add to route");
-                CountRoutes();
+                if(mPlace != null){
+                    CountRoutes();
+                }else{
+                    Toast.makeText(MapActivity.this, "Please search a location", Toast.LENGTH_SHORT).show();
+                }
+
             }
         });
 
@@ -261,6 +268,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         db
                 .collection("locations")
                 .whereEqualTo("inRoute", route_name)
+                .whereEqualTo("uid", mAuth.getCurrentUser().getUid())
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
@@ -325,28 +333,49 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     }
 
     private void WriteFirestore() {
-
         db
                 .collection("locations")
-                .document(mPlace.getName())
-                .set(mPlace)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                .whereEqualTo("inRoute", route_name)
+                .whereEqualTo("uid", mAuth.getCurrentUser().getUid())
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
-                    public void onSuccess(Void aVoid) {
-                        Toast.makeText(MapActivity.this, "Location successfully added!", Toast.LENGTH_SHORT).show();
-                        BackToRouteActivity();
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Toast.makeText(MapActivity.this, "Error adding location.", Toast.LENGTH_SHORT).show();
+                    public void onComplete(Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            boolean hasDocument = false;
+
+                            for(QueryDocumentSnapshot document : task.getResult()){
+                                Log.d(TAG, "onComplete: null document: " + document);
+                                if(document.get("name").toString().equals(mPlace.getName()))
+                                hasDocument = true;
+                            }
+                            if (!hasDocument) {
+                                db.
+                                        collection("locations")
+                                        .document(mPlace.getName()+","+route_name)
+                                        .set(mPlace)
+                                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(Task<Void> task) {
+                                                if (task.isSuccessful()) {
+                                                    Toast.makeText(MapActivity.this, "Location successfully added!", Toast.LENGTH_SHORT).show();
+                                                    BackToRouteActivity();
+                                                }
+                                            }
+                                        });
+                            }else{
+                                Toast.makeText(MapActivity.this, "Location already exist in current route.", Toast.LENGTH_SHORT).show();
+                            }
+                        }
                     }
                 });
     }
 
-    private void BackToRouteActivity(){
-        finish();
+    private void BackToRouteActivity() {
+        Intent intent = new Intent(this, RouteActivity.class);
+        intent.putExtra("route_name", route_name);
+        startActivity(intent);
+
     }
 
     private void getDeviceLocation() {

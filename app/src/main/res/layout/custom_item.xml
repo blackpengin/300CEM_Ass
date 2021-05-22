@@ -19,10 +19,11 @@
 
         <TextView
             android:id="@+id/textView1"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:layout_toEndOf="@+id/imageView"
+            android:layout_toStartOf="@+id/handle"
             android:layout_weight="1"
             android:text="Line 1"
             android:textColor="@android:color/black"
@@ -31,12 +32,13 @@
 
         <TextView
             android:id="@+id/textView2"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Line 2"
             android:textSize="15sp"
             android:layout_below="@+id/textView1"
             android:layout_toEndOf="@+id/imageView"
+            android:layout_toStartOf="@+id/handle"
             android:layout_marginStart="8dp" />
 
         <ImageView

@@ -1,6 +1,8 @@
 package com.example.a300cem_ass;
 
-public class Custom_Item {
+import java.io.Serializable;
+
+public class Custom_Item implements Serializable {
     private int mImageResource;
     private String mText1, mText2;
 

@@ -2,6 +2,7 @@ package com.example.a300cem_ass.models;
 
 public class PlaceInfo {
 
+    private String uid;
     private String inRoute;
     private String name;
     private Double latitude, longitude;
@@ -12,6 +13,10 @@ public class PlaceInfo {
     private int order;
 
     public PlaceInfo(){
+    }
+
+    public String getUid() {
+        return uid;
     }
 
     public String getInRoute() {
@@ -48,6 +53,10 @@ public class PlaceInfo {
 
     public double getRating() {
         return rating;
+    }
+
+    public void setUid(String uid) {
+        this.uid = uid;
     }
 
     public void setInRoute(String inRoute) {

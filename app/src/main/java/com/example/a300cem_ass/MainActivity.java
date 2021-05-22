@@ -20,6 +20,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
@@ -48,19 +49,15 @@ public class MainActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         addRouteBtn = (Button) findViewById(R.id.addRouteBtn);
 
-
-        ReadFirestore();
-
-
         if(isServicesOK()){
             init();
         }
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        UpdateRecycleView();
+    protected void onStart() {
+        super.onStart();
+        ReadFirestore();
     }
 
     private void init(){
@@ -74,6 +71,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void ReadFirestore(){
+        itemList.clear();
         db
                 .collection("routes")
                 .whereEqualTo("uid", mAuth.getCurrentUser().getUid())
@@ -82,14 +80,10 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 if (task.isSuccessful()) {
-                    QuerySnapshot snapShot = (QuerySnapshot) task.getResult();
-                    Log.d(TAG, "onComplete: " + snapShot);
-                    snapShot.forEach(queryDocumentSnapshot -> {
-                        Log.d(TAG, "onComplete: " + queryDocumentSnapshot.getId());
-                        String name = queryDocumentSnapshot.getId();
-
+                    for(QueryDocumentSnapshot document:task.getResult()){
+                        String name = document.get("route_name").toString();
                         itemList.add(new Custom_Item(R.drawable.ic_route, name, ""));
-                    });
+                    }
 
                     UpdateRecycleView();
                 }else{ Log.d(TAG, "onComplete: Task failed."); }
