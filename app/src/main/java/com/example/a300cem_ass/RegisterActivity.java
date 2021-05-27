@@ -70,13 +70,13 @@ public class RegisterActivity extends AppCompatActivity {
                     AuthRegister(email, password);
                 }
                 else {
-                    Toast.makeText(RegisterActivity.this, R.string.pw_confirm_pw_not_equal, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(RegisterActivity.this, getString(R.string.pw_confirm_pw_not_equal), Toast.LENGTH_SHORT).show();
                 }
             }else{
-                Toast.makeText(RegisterActivity.this, R.string.pw_empty, Toast.LENGTH_SHORT).show();
+                Toast.makeText(RegisterActivity.this, getString(R.string.pw_empty), Toast.LENGTH_SHORT).show();
             }
         }else{
-            Toast.makeText(RegisterActivity.this, R.string.email_empty, Toast.LENGTH_SHORT).show();
+            Toast.makeText(RegisterActivity.this, getString(R.string.email_empty), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -89,13 +89,12 @@ public class RegisterActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "createUserWithEmail:success");
-                            Toast.makeText(RegisterActivity.this, R.string.auth_success,
-                                    Toast.LENGTH_SHORT).show();
+                            Toast.makeText(RegisterActivity.this, getString(R.string.auth_success), Toast.LENGTH_SHORT).show();
                             EnterSignin();
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "createUserWithEmail:failure", task.getException());
-                            Toast.makeText(RegisterActivity.this, R.string.auth_fail + StringUtils.substringBetween(task.getException().toString(), "[", "]"),
+                            Toast.makeText(RegisterActivity.this, getString(R.string.auth_fail ) + StringUtils.substringBetween(task.getException().toString(), "[", "]"),
                                     Toast.LENGTH_SHORT).show();
                             //updateUI(null);
                         }

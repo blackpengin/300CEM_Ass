@@ -88,7 +88,7 @@ public class RouteActivity extends AppCompatActivity {
                         EnterRoutingActivity();
                     }
                     else{
-                        Toast.makeText(RouteActivity.this, R.string.please_add_two_locations, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(RouteActivity.this, getString(R.string.please_add_two_locations), Toast.LENGTH_SHORT).show();
                     }
 
             }
@@ -151,13 +151,13 @@ public class RouteActivity extends AppCompatActivity {
             // Check route name empty | duplicate
             if (route_name.getText().toString().equals("")) {
                 // Route name empty
-                Toast.makeText(this, R.string.please_enter_route_name, Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.please_enter_route_name), Toast.LENGTH_SHORT).show();
                 return true;
             } else {
                 CheckDuplicate();
                 Log.d(TAG, "isEmptyOrDulplicate: "+hasSameRoute);
                 if (hasSameRoute) {
-                    Toast.makeText(RouteActivity.this, R.string.route_exist, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(RouteActivity.this, getString(R.string.route_exist), Toast.LENGTH_SHORT).show();
                     return true;
                 }
 

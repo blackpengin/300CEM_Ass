@@ -64,14 +64,15 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        Toast.makeText(this, R.string.map_is_ready, Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, getString(R.string.map_is_ready), Toast.LENGTH_SHORT).show();
         Log.d(TAG, "onMapReady: map is ready");
         mMap = googleMap;
 
         if (mLocationPermissionGranted) {
             //getDeviceLocation();
 
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                    && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 return;
             }
             mMap.setMyLocationEnabled(true);
@@ -140,6 +141,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     private void initAutoComplete(){
 
         String apiKey = getString(R.string.google_maps_API_key);
+        Log.d(TAG, "initAutoComplete: "+ apiKey);
         if (!Places.isInitialized()) {
             Places.initialize(getApplicationContext(), apiKey);
         }
@@ -254,7 +256,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 if(mPlace != null){
                     CountRoutes();
                 }else{
-                    Toast.makeText(MapActivity.this, R.string.please_search_location, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MapActivity.this, getString(R.string.please_search_location), Toast.LENGTH_SHORT).show();
                 }
 
             }
@@ -358,15 +360,15 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                                             @Override
                                             public void onComplete(Task<Void> task) {
                                                 if (task.isSuccessful()) {
-                                                    Toast.makeText(MapActivity.this, R.string.add_location_success, Toast.LENGTH_SHORT).show();
+                                                    Toast.makeText(MapActivity.this, getString(R.string.add_location_success), Toast.LENGTH_SHORT).show();
                                                     BackToRouteActivity();
                                                 }else{
-                                                    Toast.makeText(MapActivity.this, R.string.add_location_fail, Toast.LENGTH_SHORT).show();
+                                                    Toast.makeText(MapActivity.this, getString(R.string.add_location_fail), Toast.LENGTH_SHORT).show();
                                                 }
                                             }
                                         });
                             }else{
-                                Toast.makeText(MapActivity.this, R.string.location_exist, Toast.LENGTH_SHORT).show();
+                                Toast.makeText(MapActivity.this, getString(R.string.location_exist), Toast.LENGTH_SHORT).show();
                             }
                         }
                     }

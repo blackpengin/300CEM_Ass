@@ -7,7 +7,7 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:215998899555:android:a8c4a565e9d1c0ae1f5f56",
+        "mobilesdk_app_id": "1:215998899555:android:c346d9bba2c53a191f5f56",
         "android_client_info": {
           "package_name": "com.example.a300cem_ass"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyCSRhuxHD25n__CUgooEDY27c42DgJNvuw"
+          "current_key": "AIzaSyAU_vVYARlvfvVgAwiz_dNm1vUglZIbwa8"
         }
       ],
       "services": {

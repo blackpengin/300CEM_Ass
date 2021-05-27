@@ -144,7 +144,7 @@ public class MainActivity extends AppCompatActivity {
             Dialog dialog = GoogleApiAvailability.getInstance().getErrorDialog(MainActivity.this, available, ERROR_DIALOG_REQUEST);
             dialog.show();
         }else{
-            Toast.makeText(this, R.string.map_service_not_available, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.map_service_not_available), Toast.LENGTH_SHORT).show();
         }
         return false;
     }

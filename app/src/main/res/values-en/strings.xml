@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">300CEM_Ass</string>
-    <string name="google_maps_API_key">AIzaSyAt5J1Vp6IQpnWxONizx5kLfxT3yNIp1lU</string>
+    <string name="google_maps_API_key">AIzaSyAU_vVYARlvfvVgAwiz_dNm1vUglZIbwa8</string>
 
     <string name="add_route">ADD ROUTE</string>
     <string name="add_location">ADD LOCATION</string>

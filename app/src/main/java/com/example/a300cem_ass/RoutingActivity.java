@@ -294,7 +294,7 @@ public class RoutingActivity extends AppCompatActivity implements OnMapReadyCall
     {
         Log.d(TAG, "Findroutes: "+Start+", " + End);
         if(Start==null || End==null) {
-            Toast.makeText(RoutingActivity.this,R.string.get_location_fail,Toast.LENGTH_LONG).show();
+            Toast.makeText(RoutingActivity.this,getString(R.string.get_location_fail),Toast.LENGTH_LONG).show();
         }
         else
         {
@@ -313,7 +313,7 @@ public class RoutingActivity extends AppCompatActivity implements OnMapReadyCall
     //Routing call back functions.
     @Override
     public void onRoutingFailure(RouteException e) {
-        Toast.makeText(RoutingActivity.this, R.string.routing_fail, Toast.LENGTH_SHORT).show();
+        Toast.makeText(RoutingActivity.this, getString(R.string.routing_fail), Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -403,7 +403,7 @@ public class RoutingActivity extends AppCompatActivity implements OnMapReadyCall
 
             mMap.addMarker(options);
             Log.d(TAG, "onRoutingSuccess: Last Marker Added"+placeInfos[placeInfoIndex].getName());
-            Toast.makeText(RoutingActivity.this, R.string.routing_success, Toast.LENGTH_SHORT).show();
+            Toast.makeText(RoutingActivity.this, getString(R.string.routing_success), Toast.LENGTH_SHORT).show();
         }
 
     }

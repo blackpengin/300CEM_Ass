@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">300CEM_Ass</string>
-    <string name="google_maps_API_key">AIzaSyAt5J1Vp6IQpnWxONizx5kLfxT3yNIp1lU</string>
+    <string name="google_maps_API_key">AIzaSyAU_vVYARlvfvVgAwiz_dNm1vUglZIbwa8</string>
 
     <string name="add_route">添加路線</string>
     <string name="add_location">添加位置</string>
@@ -18,7 +18,7 @@
     <string name="please_search_location">請搜尋位置.</string>
     <string name="add_location_success">成功添加位置!</string>
     <string name="add_location_fail">添加位置失敗.</string>
-    <string name="location_exist">位置已存在於路線,不能重複.</string>
+    <string name="location_exist">位置已存在於路線.</string>
     <string name="pw_confirm_pw_not_equal">密碼/確認密碼不一致.</string>
     <string name="email_empty">請輸入電郵.</string>
     <string name="pw_empty">請輸入密碼.</string>
